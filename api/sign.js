@@ -3,9 +3,12 @@ import crypto from "crypto";
 export default function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const { folder } = req.body || {};
+  const { folder, adminCode } = req.body || {};
   if (!folder) return res.status(400).json({ error: "Missing folder" });
 
+  const required = process.env.FE_ADMIN_CODE;
+  if (required && adminCode !== required) {
+    return res.status(401).json({ error: "Unauthorized" });
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
   const apiKey = process.env.CLOUDINARY_API_KEY;
   const apiSecret = process.env.CLOUDINARY_API_SECRET;
