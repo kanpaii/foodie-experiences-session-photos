@@ -1,5 +1,5 @@
 {
   "rewrites": [
-    { "source": "/session/:code", "destination": "/session" }
+    { "source": "/sessions/:code", "destination": "/sessions" }
   ]
 }
