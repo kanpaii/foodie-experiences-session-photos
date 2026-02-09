@@ -1,5 +1,3 @@
-import crypto from "crypto";
-
 export default async function handler(req, res) {
   const code = (req.query.code || "").toString().trim().toUpperCase();
   if (!code) return res.status(400).json({ error: "Missing code" });
@@ -13,17 +11,42 @@ export default async function handler(req, res) {
   }
 
   const folder = `fe_sessions/${code}`;
-  const prefix = `${folder}/`;
-  const timestamp = Math.floor(Date.now() / 1000);
 
-  const signatureBase = `prefix=${prefix}&timestamp=${timestamp}`;
-  const signature = crypto.createHash("sha1").update(signatureBase + apiSecret).digest("hex");
+  // Cloudinary Search API
+  const url = `https://api.cloudinary.com/v1_1/${cloudName}/resources/search`;
 
-  const url = `https://api.cloudinary.com/v1_1/${cloudName}/resources/image?prefix=${encodeURIComponent(prefix)}&timestamp=${timestamp}&api_key=${apiKey}&signature=${signature}`;
+  const auth = Buffer.from(`${apiKey}:${apiSecret}`).toString("base64");
 
-  const r = await fetch(url);
-  const data = await r.json();
-  if (!r.ok) return res.status(r.status).json(data);
+  const body = {
+    expression: `folder:${folder}`,
+    sort_by: [{ created_at: "desc" }],
+    max_results: 50,
+    with_field: ["context"], // optional; you can remove to be even faster
+  };
 
-  const urls = (data.resources || []).map(x => x.secure_url);
-  res.status(200).json({ code, count: urls.length, urls });
+  // simple timeout (10s) so the browser doesn't hang forever
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const r = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Authorization": `Basic ${auth}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+
+    const data = await r.json();
+    if (!r.ok) return res.status(r.status).json(data);
+
+    const urls = (data.resources || []).map(x => x.secure_url);
+    return res.status(200).json({ code, count: urls.length, urls });
+  } catch (e) {
+    return res.status(504).json({ error: "Cloudinary list timeout" });
+  } finally {
+    clearTimeout(t);
+  }
+}
