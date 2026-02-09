@@ -1,5 +1,5 @@
 {
-  "rewrites": [
-    { "source": "/sessions/:code", "destination": "/sessions" }
+  "routes": [
+    { "src": "/sessions/(.*)", "dest": "/sessions/index.html" }
   ]
 }
