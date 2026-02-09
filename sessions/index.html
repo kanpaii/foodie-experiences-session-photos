@@ -1,1 +1,17 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Session OK</title>
+</head>
+<body>
+  <h1>✅ Session page works</h1>
+  <p id="code"></p>
 
+  <script>
+    const parts = location.pathname.split('/');
+    document.getElementById('code').textContent =
+      'Session code: ' + (parts[2] || 'MISSING');
+  </script>
+</body>
+</html>
