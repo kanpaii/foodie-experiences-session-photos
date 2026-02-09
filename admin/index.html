@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FE Photos Admin</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:920px;margin:40px auto;padding:0 16px}
+    input,button{font-size:16px;padding:10px 12px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .box{border:1px solid #ddd;border-radius:14px;padding:16px;margin-top:16px}
+    .muted{color:#666}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:12px}
+    img{width:100%;border-radius:12px;border:1px solid #eee}
+  </style>
+</head>
+<body>
+  <h1>📸 FE Photos – Admin Upload</h1>
+  <p class="muted">Generate a code, upload photos, then share the public link.</p>
+
+  <div class="box">
+    <div class="row">
+      <label>Session code:</label>
+      <input id="code" placeholder="e.g. ABC123" />
+      <button id="btnCreate">Generate code</button>
+    </div>
+
+    <div class="row" style="margin-top:12px">
+      <input id="files" type="file" accept="image/*" multiple />
+      <button id="btnUpload">Upload</button>
+    </div>
+
+    <p class="muted" id="status" style="margin-top:12px"></p>
+    <div class="muted" id="publicLink"></div>
+    <div class="grid" id="preview"></div>
+  </div>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const codeEl = document.getElementById('code');
+    const filesEl = document.getElementById('files');
+    const previewEl = document.getElementById('preview');
+    const linkEl = document.getElementById('publicLink');
+
+    function genCode() {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let s = "";
+      for (let i=0;i<6;i++) s += chars[Math.floor(Math.random()*chars.length)];
+      return s;
+    }
+
+    function setLink(code){
+      linkEl.innerHTML = `Public link: <a href="/sessions/${code}" target="_blank">/sessions/${code}</a>`;
+    }
+
+    document.getElementById('btnCreate').onclick = () => {
+      codeEl.value = genCode();
+      setLink(codeEl.value);
+    };
+
+    document.getElementById('btnUpload').onclick = async () => {
+      const code = codeEl.value.trim().toUpperCase();
+      if (!code) return alert("Enter a session code first.");
+      const files = Array.from(filesEl.files || []);
+      if (!files.length) return alert("Select one or more images.");
+
+      statusEl.textContent = "Preparing upload…";
+      previewEl.innerHTML = "";
+      setLink(code);
+
+      const folder = `fe_sessions/${code}`;
+
+      const sigResp = await fetch('/api/sign', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ folder })
+      });
+      const sig = await sigResp.json();
+      if (!sigResp.ok) { statusEl.textContent = "Error: " + (sig.error || "sign failed"); return; }
+
+      for (const f of files) {
+        statusEl.textContent = `Uploading ${f.name}…`;
+        const fd = new FormData();
+        fd.append("file", f);
+        fd.append("api_key", sig.apiKey);
+        fd.append("timestamp", sig.timestamp);
+        fd.append("signature", sig.signature);
+        fd.append("folder", folder);
+
+        const up = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`, { method:'POST', body: fd });
+        const data = await up.json();
+        if (!up.ok) { statusEl.textContent = "Upload failed: " + (data.error?.message || ""); return; }
+
+        const img = document.createElement('img');
+        img.src = data.secure_url;
+        previewEl.appendChild(img);
+      }
+
+      statusEl.textContent = "✅ Upload complete.";
+    };
+  </script>
+</body>
+</html>
