@@ -1,17 +1,55 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Session OK</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Session Photos</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:980px;margin:40px auto;padding:0 16px}
+    .muted{color:#666}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:18px}
+    img{width:100%;border-radius:14px;border:1px solid #eee}
+    .error{background:#fff4f4;border:1px solid #ffd0d0;padding:12px;border-radius:12px;margin-top:16px}
+  </style>
 </head>
 <body>
-  <h1>✅ Session page works</h1>
-  <p id="code"></p>
+  <h1>📸 Your Session Photos</h1>
+  <div class="muted" id="meta"></div>
+  <div class="muted" id="status" style="margin-top:10px;">Loading…</div>
+  <div class="grid" id="grid"></div>
 
   <script>
-    const parts = location.pathname.split('/');
-    document.getElementById('code').textContent =
-      'Session code: ' + (parts[2] || 'MISSING');
+    const code = (location.pathname.split('/')[2] || '').trim().toUpperCase();
+    const metaEl = document.getElementById('meta');
+    const statusEl = document.getElementById('status');
+    const gridEl = document.getElementById('grid');
+
+    if (!code) {
+      statusEl.innerHTML = '<div class="error">Missing session code. Please use the QR code provided by your host.</div>';
+      throw new Error('Missing code');
+    }
+
+    metaEl.textContent = `Session code: ${code}`;
+
+    (async () => {
+      const r = await fetch(`/api/list?code=${encodeURIComponent(code)}`);
+      const data = await r.json();
+      if (!r.ok) {
+        statusEl.innerHTML = `<div class="error">Error loading photos.</div>`;
+        return;
+      }
+      if (!data.urls || data.urls.length === 0) {
+        statusEl.textContent = "No photos yet. Please check back soon.";
+        return;
+      }
+      statusEl.textContent = `Found ${data.urls.length} photo(s).`;
+      for (const url of data.urls) {
+        const img = document.createElement('img');
+        img.src = url;
+        img.loading = "lazy";
+        gridEl.appendChild(img);
+      }
+    })();
   </script>
 </body>
 </html>
