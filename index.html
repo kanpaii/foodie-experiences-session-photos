@@ -3,18 +3,96 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Foodie Experiences Photos</title>
+  <title>Foodie Experiences – Photos</title>
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:760px;margin:40px auto;padding:0 16px;line-height:1.5}
-    .box{border:1px solid #ddd;border-radius:12px;padding:16px}
-    code{background:#f6f6f6;padding:2px 6px;border-radius:6px}
+    body{
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#fafafa;
+      padding:16px;
+    }
+    .card{
+      background:#fff;
+      border:1px solid #e6e6e6;
+      border-radius:18px;
+      padding:28px;
+      max-width:420px;
+      width:100%;
+      text-align:center;
+      box-shadow:0 10px 30px rgba(0,0,0,.04);
+    }
+    h1{margin-bottom:6px}
+    p{color:#666;margin-bottom:20px}
+    input{
+      width:100%;
+      font-size:20px;
+      padding:14px 16px;
+      text-align:center;
+      letter-spacing:.15em;
+      text-transform:uppercase;
+      border-radius:12px;
+      border:1px solid #ccc;
+      outline:none;
+    }
+    button{
+      margin-top:14px;
+      width:100%;
+      padding:14px;
+      font-size:16px;
+      border-radius:12px;
+      border:none;
+      background:#111;
+      color:#fff;
+      cursor:pointer;
+    }
+    .hint{margin-top:10px;font-size:13px;color:#999}
+    .error{color:#b00020;margin-top:12px}
   </style>
 </head>
 <body>
-  <h1>📸 Foodie Experiences — Photo Gallery</h1>
-  <div class="box">
-    <p>If you arrived here by mistake, please use the QR code provided by your host.</p>
-    <p>Session pages look like: <code>/session/ABC123</code></p>
+
+  <div class="card">
+    <h1>📸 Your Photos</h1>
+    <p>Enter the code provided by your host</p>
+
+    <input
+      id="code"
+      placeholder="ABC123"
+      maxlength="8"
+      autofocus
+    />
+
+    <button id="go">Access photos</button>
+
+    <div class="hint">
+      Codes look like <strong>ABC123</strong>
+    </div>
+
+    <div class="error" id="error"></div>
   </div>
+
+  <script>
+    const input = document.getElementById('code');
+    const btn = document.getElementById('go');
+    const err = document.getElementById('error');
+
+    function submit(){
+      const code = input.value.trim().toUpperCase();
+      if (!code || code.length < 4) {
+        err.textContent = "Please enter a valid code.";
+        return;
+      }
+      window.location.href = `/sessions/${encodeURIComponent(code)}`;
+    }
+
+    btn.onclick = submit;
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') submit();
+    });
+  </script>
+
 </body>
 </html>
