@@ -84,13 +84,26 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ folder, adminCode })
     });
+    
+    const raw = await sigResp.text();   // ✅ on lit UNE fois
+    let sig = null;
 
-    // If server returns non-JSON or error, show it
-    let sig;
-    try { sig = await sigResp.json(); }
-    catch {
-      const txt = await sigResp.text();
-      statusEl.textContent = `Sign error (non-JSON): ${txt.slice(0, 200)}`;
+    try {
+      sig = JSON.parse(raw);            // ✅ on tente JSON
+    } catch {
+  // pas du JSON
+    }
+
+    if (!sigResp.ok) {
+      statusEl.textContent = `Sign error: ${
+        (sig && (sig.error || sig.message)) ? (sig.error || sig.message)
+        : raw.slice(0, 200) || "Unauthorized"
+      }`;
+    return;
+    }
+
+    if (!sig || !sig.apiKey || !sig.signature) {
+      statusEl.textContent = `Sign error: invalid response`;
       return;
     }
 
