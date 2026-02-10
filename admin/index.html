@@ -62,51 +62,77 @@
       codeEl.value = genCode();
       setLink(codeEl.value);
     };
-
     document.getElementById('btnUpload').onclick = async () => {
-      const code = codeEl.value.trim().toUpperCase();
-      if (!code) return alert("Enter a session code first.");
-      const files = Array.from(filesEl.files || []);
-      if (!files.length) return alert("Select one or more images.");
+  try {
+    const code = (document.getElementById('code')?.value || '').trim().toUpperCase();
+    const adminCode = (document.getElementById('adminCode')?.value || '').trim();
+    const files = Array.from(document.getElementById('files')?.files || []);
 
-      statusEl.textContent = "Preparing upload…";
-      previewEl.innerHTML = "";
-      setLink(code);
+    if (!code) return alert("Enter a session code first.");
+    if (!adminCode) return alert("Enter the admin code.");
+    if (!files.length) return alert("Select one or more images.");
 
-      const folder = `fe_sessions/${code}`;
-      const adminCode = adminCodeEl.value;
+    statusEl.textContent = "Preparing upload…";
+    previewEl.innerHTML = "";
+    setLink(code);
 
-      const sigResp = await fetch('/api/sign', {
+    const folder = `fe_sessions/${code}`;
+
+    // --- Call /api/sign with adminCode ---
+    const sigResp = await fetch('/api/sign', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ folder, adminCode })
+    });
+
+    // If server returns non-JSON or error, show it
+    let sig;
+    try { sig = await sigResp.json(); }
+    catch {
+      const txt = await sigResp.text();
+      statusEl.textContent = `Sign error (non-JSON): ${txt.slice(0, 200)}`;
+      return;
+    }
+
+    if (!sigResp.ok) {
+      statusEl.textContent = `Sign error: ${sig.error || sig.message || "Unauthorized"}`;
+      return;
+    }
+
+    // --- Upload files to Cloudinary ---
+    for (const f of files) {
+      statusEl.textContent = `Uploading ${f.name}…`;
+
+      const fd = new FormData();
+      fd.append("file", f);
+      fd.append("api_key", sig.apiKey);
+      fd.append("timestamp", sig.timestamp);
+      fd.append("signature", sig.signature);
+      fd.append("folder", folder);
+
+      const up = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          folder,
-          adminCode
-          })
+        body: fd
       });
-      const sig = await sigResp.json();
-      if (!sigResp.ok) { statusEl.textContent = "Error: " + (sig.error || "sign failed"); return; }
 
-      for (const f of files) {
-        statusEl.textContent = `Uploading ${f.name}…`;
-        const fd = new FormData();
-        fd.append("file", f);
-        fd.append("api_key", sig.apiKey);
-        fd.append("timestamp", sig.timestamp);
-        fd.append("signature", sig.signature);
-        fd.append("folder", folder);
-
-        const up = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`, { method:'POST', body: fd });
-        const data = await up.json();
-        if (!up.ok) { statusEl.textContent = "Upload failed: " + (data.error?.message || ""); return; }
-
-        const img = document.createElement('img');
-        img.src = data.secure_url;
-        previewEl.appendChild(img);
+      const data = await up.json();
+      if (!up.ok) {
+        statusEl.textContent = `Upload failed: ${data?.error?.message || "Unknown error"}`;
+        return;
       }
 
-      statusEl.textContent = "✅ Upload complete.";
-    };
+      const img = document.createElement('img');
+      img.src = data.secure_url;
+      previewEl.appendChild(img);
+    }
+
+    statusEl.textContent = "✅ Upload complete.";
+  } catch (e) {
+    statusEl.textContent = `Unexpected error: ${e?.message || e}`;
+  }
+};
+
+    
   </script>
 </body>
 </html>
