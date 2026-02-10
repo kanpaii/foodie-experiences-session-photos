@@ -43,6 +43,7 @@
     const statusEl = document.getElementById('status');
     const codeEl = document.getElementById('code');
     const filesEl = document.getElementById('files');
+    const adminCodeEl = document.getElementById('adminCode');
     const previewEl = document.getElementById('preview');
     const linkEl = document.getElementById('publicLink');
 
@@ -73,11 +74,15 @@
       setLink(code);
 
       const folder = `fe_sessions/${code}`;
+      const adminCode = adminCodeEl.value;
 
       const sigResp = await fetch('/api/sign', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ folder })
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          folder,
+          adminCode
+          })
       });
       const sig = await sigResp.json();
       if (!sigResp.ok) { statusEl.textContent = "Error: " + (sig.error || "sign failed"); return; }
