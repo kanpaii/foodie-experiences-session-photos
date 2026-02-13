@@ -5,49 +5,136 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Session Photos</title>
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:980px;margin:40px auto;padding:0 16px}
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:1040px;margin:40px auto;padding:0 16px}
     .muted{color:#666}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:18px}
+    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:stretch}
+    .panel{border:1px solid #e6e6e6;border-radius:14px;padding:12px 14px;flex:1;min-width:240px}
+    .k{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.06em}
+    .v{font-size:15px;margin-top:4px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:18px}
     img{width:100%;border-radius:14px;border:1px solid #eee}
     .error{background:#fff4f4;border:1px solid #ffd0d0;padding:12px;border-radius:12px;margin-top:16px}
+    .ok{background:#f3fff3;border:1px solid #c9f1c9;padding:12px;border-radius:12px;margin-top:16px}
   </style>
 </head>
 <body>
   <h1>📸 Your Session Photos</h1>
-  <div class="muted" id="meta"></div>
-  <div class="muted" id="status" style="margin-top:10px;">Loading…</div>
+
+  <div class="top" id="metaWrap" style="display:none;margin-top:12px;">
+    <div class="panel">
+      <div class="k">Photo code</div>
+      <div class="v" id="codeTxt">—</div>
+    </div>
+    <div class="panel">
+      <div class="k">Session time (Paris)</div>
+      <div class="v" id="sessionTxt">—</div>
+    </div>
+    <div class="panel">
+      <div class="k">Available until (Paris)</div>
+      <div class="v" id="expiryTxt">—</div>
+    </div>
+    <div class="panel">
+      <div class="k">Time left</div>
+      <div class="v" id="countdownTxt">—</div>
+    </div>
+  </div>
+
+  <div class="muted" id="status" style="margin-top:12px;">Loading…</div>
   <div class="grid" id="grid"></div>
 
   <script>
-    const code = (location.pathname.split('/')[2] || '').trim().toUpperCase();
-    const metaEl = document.getElementById('meta');
+    const code = (location.pathname.split('/')[2] || '').trim();
     const statusEl = document.getElementById('status');
     const gridEl = document.getElementById('grid');
 
-    if (!code) {
-      statusEl.innerHTML = '<div class="error">Missing session code. Please use the QR code provided by your host.</div>';
-      throw new Error('Missing code');
+    const metaWrap = document.getElementById('metaWrap');
+    const codeTxt = document.getElementById('codeTxt');
+    const sessionTxt = document.getElementById('sessionTxt');
+    const expiryTxt = document.getElementById('expiryTxt');
+    const countdownTxt = document.getElementById('countdownTxt');
+
+    function fmtParis(d){
+      return d.toLocaleString('en-GB', {
+        timeZone: 'Europe/Paris',
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
     }
 
-    metaEl.textContent = `Session code: ${code}`;
+    function parseYYMMDDHH(s){
+      if (!/^\d{8}$/.test(s)) return null;
+      const yy = Number(s.slice(0,2));
+      const mm = Number(s.slice(2,4));
+      const dd = Number(s.slice(4,6));
+      const hh = Number(s.slice(6,8));
+      if (mm < 1 || mm > 12 || dd < 1 || dd > 31 || hh < 0 || hh > 23) return null;
+      const year = 2000 + yy;
+      const dt = new Date(year, mm-1, dd, hh, 0, 0);
+      return Number.isNaN(dt.getTime()) ? null : dt;
+    }
+
+    const sessionDate = parseYYMMDDHH(code);
+
+    if (!sessionDate) {
+      statusEl.innerHTML = '<div class="error">Invalid code. Please use the 8-digit code provided by your host (YYMMDDHH).</div>';
+      throw new Error('Invalid code');
+    }
+
+    // Expiration: +1 calendar month from the session date/time
+    const expiryDate = new Date(sessionDate);
+    expiryDate.setMonth(expiryDate.getMonth() + 1);
+
+    metaWrap.style.display = '';
+    codeTxt.textContent = code;
+    sessionTxt.textContent = fmtParis(sessionDate);
+    expiryTxt.textContent = fmtParis(expiryDate);
+
+    function tick(){
+      const ms = expiryDate.getTime() - Date.now();
+      if (ms <= 0) {
+        countdownTxt.textContent = 'Expired';
+        statusEl.innerHTML = `<div class="error">This gallery expired on ${fmtParis(expiryDate)}.</div>`;
+        return false;
+      }
+      const totalMin = Math.floor(ms / 60000);
+      const days = Math.floor(totalMin / (60*24));
+      const hours = Math.floor((totalMin % (60*24)) / 60);
+      const mins = totalMin % 60;
+      countdownTxt.textContent = `${days}d ${hours}h ${mins}m`;
+      return true;
+    }
+
+    if (!tick()) {
+      throw new Error('Expired');
+    }
+    setInterval(tick, 30000);
 
     (async () => {
-      const r = await fetch(`/api/list?code=${encodeURIComponent(code)}`);
-      const data = await r.json();
-      if (!r.ok) {
-        statusEl.innerHTML = `<div class="error">Error loading photos.</div>`;
-        return;
-      }
-      if (!data.urls || data.urls.length === 0) {
-        statusEl.textContent = "No photos yet. Please check back soon.";
-        return;
-      }
-      statusEl.textContent = `Found ${data.urls.length} photo(s).`;
-      for (const url of data.urls) {
-        const img = document.createElement('img');
-        img.src = url;
-        img.loading = "lazy";
-        gridEl.appendChild(img);
+      try {
+        statusEl.textContent = "Loading photos… (first load can take a few seconds)";
+        const r = await fetch(`/api/list?code=${encodeURIComponent(code)}`);
+        const data = await r.json();
+        if (!r.ok) {
+          statusEl.innerHTML = `<div class="error">Temporary issue loading photos. Please refresh in a minute.</div>`;
+          return;
+        }
+        if (!data.urls || data.urls.length === 0) {
+          statusEl.innerHTML = `<div class="ok">No photos yet. Please check back soon.</div>`;
+          return;
+        }
+        statusEl.textContent = `Found ${data.urls.length} photo(s).`;
+        for (const url of data.urls) {
+          const img = document.createElement('img');
+          img.src = url;
+          img.loading = "lazy";
+          gridEl.appendChild(img);
+        }
+      } catch (e) {
+        statusEl.innerHTML = `<div class="error">Temporary issue loading photos. Please refresh in a minute.</div>`;
       }
     })();
   </script>
