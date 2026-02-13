@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Foodie Experiences – Photos</title>
   <style>
+    *{box-sizing:border-box;}
     body{
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       min-height:100vh;
@@ -19,19 +20,22 @@
       border:1px solid #e6e6e6;
       border-radius:18px;
       padding:28px;
-      max-width:420px;
+      max-width:520px;
       width:100%;
       text-align:center;
       box-shadow:0 10px 30px rgba(0,0,0,.04);
     }
-    h1{margin-bottom:6px}
-    p{color:#666;margin-bottom:20px}
+    h1{margin:0 0 6px}
+    p{color:#666;margin:0 0 18px}
+    .field{width:100%;} /* prevents overflow */
     input{
       width:100%;
+      max-width:100%;
+      display:block;
       font-size:20px;
       padding:14px 16px;
       text-align:center;
-      letter-spacing:.15em;
+      letter-spacing:.12em;
       text-transform:uppercase;
       border-radius:12px;
       border:1px solid #ccc;
@@ -48,7 +52,8 @@
       color:#fff;
       cursor:pointer;
     }
-    .hint{margin-top:10px;font-size:13px;color:#999}
+    .hint{margin-top:12px;font-size:13px;color:#777;line-height:1.35}
+    .hint code{background:#f3f3f3;padding:2px 6px;border-radius:6px}
     .error{color:#b00020;margin-top:12px}
   </style>
 </head>
@@ -56,19 +61,25 @@
 
   <div class="card">
     <h1>📸 Your Photos</h1>
-    <p>Enter the code provided by your host</p>
+    <p>Enter the 8-digit code provided by your host</p>
 
-    <input
-      id="code"
-      placeholder="ABC123"
-      maxlength="8"
-      autofocus
-    />
+    <div class="field">
+      <input
+        id="code"
+        placeholder="YYMMDDHH (e.g. 26051614)"
+        maxlength="8"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        autofocus
+      />
+    </div>
 
     <button id="go">Access photos</button>
 
     <div class="hint">
-      Codes look like <strong>ABC123</strong>
+      Format: <code>YYMMDDHH</code> (year, month, day, hour).<br/>
+      Example: May 16, 2026 at 14:00 → <code>26051614</code><br/>
+      Don’t have your code? Check the note from your host.
     </div>
 
     <div class="error" id="error"></div>
@@ -80,9 +91,10 @@
     const err = document.getElementById('error');
 
     function submit(){
-      const code = input.value.trim().toUpperCase();
-      if (!code || code.length < 4) {
-        err.textContent = "Please enter a valid code.";
+      err.textContent = "";
+      const code = (input.value || "").replace(/\D/g,''); // keep digits only
+      if (!/^\d{8}$/.test(code)) {
+        err.textContent = "Please enter the 8-digit code (YYMMDDHH).";
         return;
       }
       window.location.href = `/sessions/${encodeURIComponent(code)}`;
@@ -91,6 +103,11 @@
     btn.onclick = submit;
     input.addEventListener('keydown', e => {
       if (e.key === 'Enter') submit();
+    });
+
+    // Nice UX: auto-trim to 8 digits while typing/pasting
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/\D/g,'').slice(0,8);
     });
   </script>
 
