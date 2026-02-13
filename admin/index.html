@@ -5,33 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FE Photos Admin</title>
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:920px;margin:40px auto;padding:0 16px}
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:980px;margin:40px auto;padding:0 16px}
     input,button{font-size:16px;padding:10px 12px}
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
     .box{border:1px solid #ddd;border-radius:14px;padding:16px;margin-top:16px}
     .muted{color:#666}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:12px}
     img{width:100%;border-radius:12px;border:1px solid #eee}
+    .small{font-size:13px;color:#777}
+    .pill{display:inline-block;background:#f3f3f3;border:1px solid #e6e6e6;border-radius:999px;padding:4px 10px;font-size:12px;color:#444}
   </style>
 </head>
 <body>
   <h1>📸 FE Photos – Admin Upload</h1>
-  <p class="muted">Generate a code, upload photos, then share the public link.</p>
+  <p class="muted">Use the technical 8-digit code (YYMMDDHH) and upload photos to that session.</p>
 
   <div class="box">
     <div class="row">
-      <label>Session code:</label>
-      <input id="code" placeholder="e.g. ABC123" />
-      <button id="btnCreate">Generate code</button>
-    </div>
-    <div class="row" style="margin-top:8px">
       <label>Admin code:</label>
       <input id="adminCode" type="password" placeholder="Admin code" />
+      <span class="pill">required</span>
     </div>
 
-    <div class="row" style="margin-top:12px">
+    <div class="row" style="margin-top:10px">
+      <label>Photo code (YYMMDDHH):</label>
+      <input id="code" placeholder="YYMMDDHH (e.g. 26051614)" maxlength="8" inputmode="numeric" />
+      <button id="btnNow" type="button">Now</button>
+    </div>
+
+    <div class="small" style="margin-top:8px">
+      Format: YYMMDDHH (Paris time). Example: May 16, 2026 at 14:00 → 26051614
+    </div>
+
+    <div class="row" style="margin-top:14px">
       <input id="files" type="file" accept="image/*" multiple />
-      <button id="btnUpload">Upload</button>
+      <button id="btnUpload" type="button">Upload</button>
     </div>
 
     <p class="muted" id="status" style="margin-top:12px"></p>
@@ -42,110 +51,124 @@
   <script>
     const statusEl = document.getElementById('status');
     const codeEl = document.getElementById('code');
-    const filesEl = document.getElementById('files');
     const adminCodeEl = document.getElementById('adminCode');
+    const filesEl = document.getElementById('files');
     const previewEl = document.getElementById('preview');
     const linkEl = document.getElementById('publicLink');
 
-    function genCode() {
-      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-      let s = "";
-      for (let i=0;i<6;i++) s += chars[Math.floor(Math.random()*chars.length)];
-      return s;
-    }
-
     function setLink(code){
-      linkEl.innerHTML = `Public link: <a href="/sessions/${code}" target="_blank">/sessions/${code}</a>`;
+      const full = `${location.origin}/sessions/${code}`;
+      linkEl.innerHTML = `Public link: <a href="${full}" target="_blank">${full}</a>`;
     }
 
-    document.getElementById('btnCreate').onclick = () => {
-      codeEl.value = genCode();
+    function toYYMMDDHHParis(d){
+      // Use Europe/Paris and output YYMMDDHH
+      const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Europe/Paris',
+        year: '2-digit',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        hourCycle: 'h23'
+      }).formatToParts(d);
+
+      const get = t => parts.find(p => p.type === t)?.value || '';
+      const yy = get('year');
+      const mm = get('month');
+      const dd = get('day');
+      const hh = get('hour');
+      return `${yy}${mm}${dd}${hh}`;
+    }
+
+    function cleanCode(v){
+      return (v || '').replace(/\D/g,'').slice(0,8);
+    }
+
+    function isValidCode(code){
+      if (!/^\d{8}$/.test(code)) return false;
+      const yy = Number(code.slice(0,2));
+      const mm = Number(code.slice(2,4));
+      const dd = Number(code.slice(4,6));
+      const hh = Number(code.slice(6,8));
+      return (mm>=1 && mm<=12 && dd>=1 && dd<=31 && hh>=0 && hh<=23);
+    }
+
+    document.getElementById('btnNow').onclick = () => {
+      codeEl.value = toYYMMDDHHParis(new Date());
       setLink(codeEl.value);
     };
-    document.getElementById('btnUpload').onclick = async () => {
-  try {
-    const code = (document.getElementById('code')?.value || '').trim().toUpperCase();
-    const adminCode = (document.getElementById('adminCode')?.value || '').trim();
-    const files = Array.from(document.getElementById('files')?.files || []);
 
-    if (!code) return alert("Enter a session code first.");
-    if (!adminCode) return alert("Enter the admin code.");
-    if (!files.length) return alert("Select one or more images.");
-
-    statusEl.textContent = "Preparing upload…";
-    previewEl.innerHTML = "";
-    setLink(code);
-
-    const folder = `fe_sessions/${code}`;
-
-    // --- Call /api/sign with adminCode ---
-    const sigResp = await fetch('/api/sign', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ folder, adminCode })
+    codeEl.addEventListener('input', () => {
+      codeEl.value = cleanCode(codeEl.value);
+      if (isValidCode(codeEl.value)) setLink(codeEl.value);
     });
-    
-    const raw = await sigResp.text();   // ✅ on lit UNE fois
-    let sig = null;
 
-    try {
-      sig = JSON.parse(raw);            // ✅ on tente JSON
-    } catch {
-  // pas du JSON
-    }
+    document.getElementById('btnUpload').onclick = async () => {
+      try {
+        const adminCode = (adminCodeEl.value || '').trim();
+        const code = cleanCode(codeEl.value);
+        const files = Array.from(filesEl.files || []);
 
-    if (!sigResp.ok) {
-      statusEl.textContent = `Sign error: ${
-        (sig && (sig.error || sig.message)) ? (sig.error || sig.message)
-        : raw.slice(0, 200) || "Unauthorized"
-      }`;
-    return;
-    }
+        if (!adminCode) return alert("Enter the admin code.");
+        if (!isValidCode(code)) return alert("Enter a valid 8-digit photo code (YYMMDDHH).");
+        if (!files.length) return alert("Select one or more images.");
 
-    if (!sig || !sig.apiKey || !sig.signature) {
-      statusEl.textContent = `Sign error: invalid response`;
-      return;
-    }
+        statusEl.textContent = "Preparing upload…";
+        previewEl.innerHTML = "";
+        setLink(code);
 
-    if (!sigResp.ok) {
-      statusEl.textContent = `Sign error: ${sig.error || sig.message || "Unauthorized"}`;
-      return;
-    }
+        const folder = `fe_sessions/${code}`;
 
-    // --- Upload files to Cloudinary ---
-    for (const f of files) {
-      statusEl.textContent = `Uploading ${f.name}…`;
+        const sigResp = await fetch('/api/sign', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ folder, adminCode })
+        });
 
-      const fd = new FormData();
-      fd.append("file", f);
-      fd.append("api_key", sig.apiKey);
-      fd.append("timestamp", sig.timestamp);
-      fd.append("signature", sig.signature);
-      fd.append("folder", folder);
+        const raw = await sigResp.text();
+        let sig = null;
+        try { sig = JSON.parse(raw); } catch {}
 
-      const up = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`, {
-        method: 'POST',
-        body: fd
-      });
+        if (!sigResp.ok) {
+          statusEl.textContent = `Sign error: ${(sig && (sig.error || sig.message)) ? (sig.error || sig.message) : (raw.slice(0,200) || "Unauthorized")}`;
+          return;
+        }
+        if (!sig || !sig.apiKey || !sig.signature || !sig.cloudName || !sig.timestamp) {
+          statusEl.textContent = "Sign error: invalid response.";
+          return;
+        }
 
-      const data = await up.json();
-      if (!up.ok) {
-        statusEl.textContent = `Upload failed: ${data?.error?.message || "Unknown error"}`;
-        return;
+        for (const f of files) {
+          statusEl.textContent = `Uploading ${f.name}…`;
+
+          const fd = new FormData();
+          fd.append("file", f);
+          fd.append("api_key", sig.apiKey);
+          fd.append("timestamp", sig.timestamp);
+          fd.append("signature", sig.signature);
+          fd.append("folder", folder);
+
+          const up = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`, {
+            method:'POST',
+            body: fd
+          });
+
+          const data = await up.json();
+          if (!up.ok) {
+            statusEl.textContent = `Upload failed: ${data?.error?.message || "Unknown error"}`;
+            return;
+          }
+
+          const img = document.createElement('img');
+          img.src = data.secure_url;
+          previewEl.appendChild(img);
+        }
+
+        statusEl.textContent = "✅ Upload complete.";
+      } catch (e) {
+        statusEl.textContent = `Unexpected error: ${e?.message || e}`;
       }
-
-      const img = document.createElement('img');
-      img.src = data.secure_url;
-      previewEl.appendChild(img);
-    }
-
-    statusEl.textContent = "✅ Upload complete.";
-  } catch (e) {
-    statusEl.textContent = `Unexpected error: ${e?.message || e}`;
-  }
-};
-
-    
+    };
   </script>
 </body>
 </html>
