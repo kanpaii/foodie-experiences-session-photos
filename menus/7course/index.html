@@ -1,224 +1,113 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>7-Course French Tasting</title>
-
-  <style>
-    *{box-sizing:border-box}
-
-    body{
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      max-width:900px;
-      margin:40px auto;
-      padding:0 16px;
-      line-height:1.5;
-      color:#111;
-    }
-
-    h1,h2,h3{
-      line-height:1.2;
-    }
-
-    .hero{
-      margin-bottom:24px;
-    }
-
-    .hero p{
-      color:#555;
-      font-size:17px;
-    }
-
-    .dish{
-      margin-top:28px;
-      padding-top:24px;
-      border-top:1px solid #eee;
-    }
-
-    .dish img{
-      width:100%;
-      border-radius:18px;
-      margin-top:14px;
-    }
-
-    .wine{
-      background:#faf7f2;
-      padding:12px 14px;
-      border-radius:12px;
-      margin-top:12px;
-    }
-
-    .footer{
-      margin-top:40px;
-      padding:22px;
-      border-radius:18px;
-      background:#fafafa;
-      border:1px solid #eee;
-    }
-
-    .error{
-      background:#fff4f4;
-      border:1px solid #ffd0d0;
-      padding:14px;
-      border-radius:12px;
-      margin-top:18px;
-    }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>7-Course French Tasting Menu</title>
+<style>
+*{box-sizing:border-box}
+:root{--coral:#f26f5e;--green:#0b6b57;--cream:#fff8f1;--ink:#1d1d1d}
+body{margin:0;font-family:Georgia,"Times New Roman",serif;background:var(--cream);color:var(--ink);line-height:1.55}
+main{max-width:980px;margin:0 auto;padding:34px 18px}
+.hero{background:#fff;border:1px solid #eadfd4;border-radius:26px;padding:30px;box-shadow:0 12px 30px rgba(0,0,0,.04)}
+.badge{display:inline-block;background:var(--green);color:white;border-radius:999px;padding:7px 14px;font-family:system-ui,sans-serif;font-size:13px}
+h1{color:var(--green);font-size:38px;margin:18px 0 8px}
+h2{color:var(--coral);margin-top:34px}
+.dish{background:#fff;border:1px solid #eadfd4;border-radius:20px;padding:20px;margin-top:16px}
+.wine{margin-top:10px;background:#fff3ed;border-left:4px solid var(--coral);padding:10px 14px;border-radius:10px}
+.photoSlot{margin-top:14px;border:2px dashed #eadfd4;border-radius:18px;padding:26px;text-align:center;color:#999;font-family:system-ui,sans-serif}
+.footer{margin-top:30px;background:var(--green);color:white;border-radius:24px;padding:24px}
+.error{background:#fff4f4;border:1px solid #ffd0d0;padding:14px;border-radius:12px}
+</style>
 </head>
 <body>
-
-<div id="content"></div>
+<main id="content"></main>
 
 <script>
-const params = new URLSearchParams(location.search);
-const code = (params.get('code') || '').trim();
+const params=new URLSearchParams(location.search);
+const code=(params.get('code')||'').trim();
 
 function parseYYMMDDHH(s){
   if(!/^\d{8}$/.test(s)) return null;
-
-  const yy = Number(s.slice(0,2));
-  const mm = Number(s.slice(2,4));
-  const dd = Number(s.slice(4,6));
-  const hh = Number(s.slice(6,8));
-
-  const year = 2000 + yy;
-
-  return new Date(year, mm-1, dd, hh, 0, 0);
+  const yy=Number(s.slice(0,2)), mm=Number(s.slice(2,4)), dd=Number(s.slice(4,6)), hh=Number(s.slice(6,8));
+  return new Date(2000+yy,mm-1,dd,hh,0,0);
 }
 
-const sessionDate = parseYYMMDDHH(code);
-
+const sessionDate=parseYYMMDDHH(code);
 if(!sessionDate){
-  document.getElementById('content').innerHTML =
-    '<div class="error">Invalid or missing access code.</div>';
+  content.innerHTML='<div class="error">Invalid or missing access code.</div>';
   throw new Error('invalid');
 }
-
-const expiryDate = new Date(sessionDate);
-expiryDate.setMonth(expiryDate.getMonth() + 1);
-
-if(Date.now() > expiryDate.getTime()){
-  document.getElementById('content').innerHTML =
-    '<div class="error">This menu is no longer available.</div>';
+const expiryDate=new Date(sessionDate);
+expiryDate.setMonth(expiryDate.getMonth()+1);
+if(Date.now()>expiryDate.getTime()){
+  content.innerHTML='<div class="error">This menu is no longer available.</div>';
   throw new Error('expired');
 }
 
-document.getElementById('content').innerHTML = `
-  <div class="hero">
-    <h1>🍽️ 7-Course French Tasting Menu</h1>
+content.innerHTML=`
+<section class="hero">
+  <span class="badge">Foodie Experiences Paris</span>
+  <h1>Our 7-Course French Tasting Menu</h1>
+  <p>An authentic journey through the finest regional flavors of France…</p>
+</section>
 
-    <p>
-      Did you enjoy our 7 dishes 7 wines tasting in Paris? 🤗
-    </p>
+<div class="dish">
+  <h2>🍽️ Fresh Oysters from Brittany – “Fine de Claire” No. 3</h2>
+  <p>Served with country-style bread, Normandy butter, lemon wedges, shallot & apple cider vinegar mignonette.</p>
+  <div class="wine"><strong>Wine pairing:</strong> Muscadet Sèvre-et-Maine sur Lie – crisp and mineral, Petit Melon grape.</div>
+</div>
 
-    <p>
-      We hope your tastebuds are still smiling.
-    </p>
-  </div>
+<div class="dish">
+  <h2>🍽️ Sautéed Frog Legs in Parsley-Garlic Butter</h2>
+  <p>A French classic – delicately pan-seared and served with warm baguette slices.</p>
+  <div class="wine"><strong>Wine pairing:</strong> Menetou-Salon Red – light-bodied and aromatic, Pinot Noir grape.</div>
+</div>
 
-  <div class="dish">
-    <h2>🦪 Fresh Oysters from Brittany</h2>
+<div class="dish">
+  <h2>🍽️ Burgundy Snails Roasted with Garlic-Parsley Butter</h2>
+  <p>Tender escargots, rich and savory, roasted in their shells.</p>
+  <div class="wine"><strong>Wine pairing:</strong> Chablis – elegant, dry and flinty, Chardonnay grape.</div>
+</div>
 
-    <p>
-      Fine de Claire No. 3 oysters served with Normandy butter,
-      bread, lemon and mignonette sauce.
-    </p>
+<div class="photoSlot">Image placeholder — dish photo later</div>
 
-    <div class="wine">
-      <strong>Wine pairing:</strong><br/>
-      Muscadet Sèvre-et-Maine sur Lie
-    </div>
-  </div>
+<div class="dish">
+  <h2>🍽️ Burgundy-style Beef Stew</h2>
+  <p>Crispy baguette to soak up the sauce.</p>
+  <div class="wine"><strong>Wine pairing:</strong> Graves Red Bordeaux – structured and full-bodied, Cabernet Sauvignon & Merlot grapes.</div>
+</div>
 
-  <div class="dish">
-    <h2>🐸 Sautéed Frog Legs</h2>
+<div class="dish">
+  <h2>🍽️ Camembert from Normandy, Aged 29 Days</h2>
+  <p>Creamy, earthy cheese served with raw apple slices and Isigny butter.</p>
+  <div class="wine"><strong>Pairing:</strong> Brut Normandy Cider – fresh and slightly tannic.</div>
+</div>
 
-    <p>
-      Pan-seared in parsley garlic butter.
-    </p>
+<div class="dish">
+  <h2>🍽️ Roquefort Cheese from Aveyron, Aged 45 Days</h2>
+  <p>Bold sheep’s milk blue cheese with blueberry jam and Provençal olive oil.</p>
+  <div class="wine"><strong>Pairing:</strong> Côte du Rhône Village – medium-bodied, smooth and fruity, with notes of ripe berries, pepper, herbs and spice.</div>
+</div>
 
-    <div class="wine">
-      <strong>Wine pairing:</strong><br/>
-      Menetou-Salon Red
-    </div>
-  </div>
+<div class="dish">
+  <h2>🍽️ Strawberry Garigette Tart on Breton Shortbread Crust</h2>
+  <p>Raspberry & chantilly sauces.</p>
+  <div class="wine"><strong>Wine pairing:</strong> Blanc de Blancs Champagne – bright, refined and festive, Chardonnay grape.</div>
+</div>
 
-  <div class="dish">
-    <h2>🐌 Burgundy Snails</h2>
-
-    <p>
-      Roasted with garlic parsley butter.
-    </p>
-
-    <div class="wine">
-      <strong>Wine pairing:</strong><br/>
-      Chablis
-    </div>
-  </div>
-
-  <div class="dish">
-    <h2>🥘 Burgundy-style Beef Stew</h2>
-
-    <p>
-      Traditional slow-cooked French beef stew.
-    </p>
-
-    <div class="wine">
-      <strong>Wine pairing:</strong><br/>
-      Graves Red Bordeaux
-    </div>
-  </div>
-
-  <div class="dish">
-    <h2>🧀 Camembert from Normandy</h2>
-
-    <p>
-      Served with apples and Isigny butter.
-    </p>
-  </div>
-
-  <div class="dish">
-    <h2>🧀 Roquefort Cheese</h2>
-
-    <p>
-      Sheep milk blue cheese with blueberry jam.
-    </p>
-  </div>
-
-  <div class="dish">
-    <h2>🍓 Strawberry Tart</h2>
-
-    <p>
-      Strawberry Gariguette tart with raspberry & chantilly sauces.
-    </p>
-
-    <div class="wine">
-      <strong>Wine pairing:</strong><br/>
-      Blanc de Blancs Champagne
-    </div>
-  </div>
-
-  <div class="footer">
-    <h3>💕 Thank you for joining us</h3>
-
-    <p>
-      We offer private culinary experiences in Paris:
-    </p>
-
-    <ul>
-      <li>Birthday parties</li>
-      <li>Romantic dinners</li>
-      <li>Corporate events</li>
-      <li>Team building</li>
-    </ul>
-
-    <p>
-      👨‍🍳 Chef Alex
-    </p>
-  </div>
+<div class="footer">
+  <p>It was such a pleasure to meet you. 💕</p>
+  <p>If you'd like to explore more French gastronomy, we offer private culinary experiences for:<br>
+  – Birthday parties<br>– Romantic dinners<br>– Team-building events<br>– Cocktail kick-offs<br>… and more!</p>
+  <p>We’d love to hear what you thought of the experience in your review. Feel free to write it in your native language 🥳</p>
+  <p><strong>Let’s stay in touch:</strong><br>
+  👨‍🍳 Chef Alex<br>
+  🌐 Foodie-Experiences.com<br>
+  📱 WhatsApp: +33 (0)6 63 30 62 14<br>
+  📸 YouTube: ChefAlexParis</p>
+</div>
 `;
 </script>
-
 </body>
 </html>
