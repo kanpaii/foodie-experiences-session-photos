@@ -18,6 +18,14 @@ h2{color:var(--coral);margin-top:34px}
 .photoSlot{margin-top:14px;border:2px dashed #eadfd4;border-radius:18px;padding:26px;text-align:center;color:#999;font-family:system-ui,sans-serif}
 .footer{margin-top:30px;background:var(--green);color:white;border-radius:24px;padding:24px}
 .error{background:#fff4f4;border:1px solid #ffd0d0;padding:14px;border-radius:12px}
+.menuImg{
+  width:100%;
+  max-height:420px;
+  object-fit:cover;
+  border-radius:20px;
+  margin:18px 0;
+  border:1px solid #eadfd4;
+}
 </style>
 </head>
 <body>
@@ -54,23 +62,24 @@ content.innerHTML=`
 
 <div class="dish">
   <h2>🍽️ Fresh Oysters from Brittany – “Fine de Claire” No. 3</h2>
+  <img class="menuImg" src="/assets/menus/assiette-huitres.jpeg" alt="Fresh oysters from Brittany">
   <p>Served with country-style bread, Normandy butter, lemon wedges, shallot & apple cider vinegar mignonette.</p>
   <div class="wine"><strong>Wine pairing:</strong> Muscadet Sèvre-et-Maine sur Lie – crisp and mineral, Petit Melon grape.</div>
 </div>
 
 <div class="dish">
   <h2>🍽️ Sautéed Frog Legs in Parsley-Garlic Butter</h2>
+  <img class="menuImg" src="/assets/menus/grenouilles.jpg" alt="Sautéed frog legs in parsley garlic butter">
   <p>A French classic – delicately pan-seared and served with warm baguette slices.</p>
   <div class="wine"><strong>Wine pairing:</strong> Menetou-Salon Red – light-bodied and aromatic, Pinot Noir grape.</div>
 </div>
 
 <div class="dish">
   <h2>🍽️ Burgundy Snails Roasted with Garlic-Parsley Butter</h2>
+  <img class="menuImg" src="/assets/menus/escargots.jpg" alt="Burgundy snails with garlic parsley butter">
   <p>Tender escargots, rich and savory, roasted in their shells.</p>
   <div class="wine"><strong>Wine pairing:</strong> Chablis – elegant, dry and flinty, Chardonnay grape.</div>
 </div>
-
-<div class="photoSlot">Image placeholder — dish photo later</div>
 
 <div class="dish">
   <h2>🍽️ Burgundy-style Beef Stew</h2>
