@@ -3,123 +3,95 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-
-<title>Cheese & Wine Tasting</title>
-
+<title>Cheese & Wine Menu</title>
 <style>
 *{box-sizing:border-box}
-
-body{
-font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-max-width:900px;
-margin:40px auto;
-padding:0 16px;
-line-height:1.5;
-}
-
-.hero{
-margin-bottom:28px;
-}
-
-.section{
-margin-top:24px;
-padding-top:20px;
-border-top:1px solid #eee;
-}
-
-.error{
-background:#fff4f4;
-border:1px solid #ffd0d0;
-padding:14px;
-border-radius:12px;
-}
+:root{--coral:#f26f5e;--green:#0b6b57;--cream:#fff8f1;--ink:#1d1d1d}
+body{margin:0;font-family:Georgia,"Times New Roman",serif;background:var(--cream);color:var(--ink);line-height:1.55}
+main{max-width:980px;margin:0 auto;padding:34px 18px}
+.hero{background:#fff;border:1px solid #eadfd4;border-radius:26px;padding:30px;box-shadow:0 12px 30px rgba(0,0,0,.04)}
+.badge{display:inline-block;background:var(--green);color:white;border-radius:999px;padding:7px 14px;font-family:system-ui,sans-serif;font-size:13px}
+h1{color:var(--green);font-size:38px;margin:18px 0 8px}
+h2{color:var(--coral);margin-top:34px}
+.card{background:#fff;border:1px solid #eadfd4;border-radius:20px;padding:20px;margin-top:16px}
+.item{padding:14px 0;border-top:1px solid #eee}
+.item:first-child{border-top:0}
+.photoSlot{margin-top:14px;border:2px dashed #eadfd4;border-radius:18px;padding:26px;text-align:center;color:#999;font-family:system-ui,sans-serif}
+.footer{margin-top:30px;background:var(--green);color:white;border-radius:24px;padding:24px}
+.error{background:#fff4f4;border:1px solid #ffd0d0;padding:14px;border-radius:12px}
 </style>
 </head>
 <body>
-
-<div id="content"></div>
+<main id="content"></main>
 
 <script>
-const params = new URLSearchParams(location.search);
-const code = (params.get('code') || '').trim();
+const params=new URLSearchParams(location.search);
+const code=(params.get('code')||'').trim();
 
 function parseYYMMDDHH(s){
-if(!/^\d{8}$/.test(s)) return null;
-
-const yy = Number(s.slice(0,2));
-const mm = Number(s.slice(2,4));
-const dd = Number(s.slice(4,6));
-const hh = Number(s.slice(6,8));
-
-return new Date(2000+yy, mm-1, dd, hh, 0, 0);
+  if(!/^\d{8}$/.test(s)) return null;
+  const yy=Number(s.slice(0,2)), mm=Number(s.slice(2,4)), dd=Number(s.slice(4,6)), hh=Number(s.slice(6,8));
+  return new Date(2000+yy,mm-1,dd,hh,0,0);
 }
 
-const sessionDate = parseYYMMDDHH(code);
-
+const sessionDate=parseYYMMDDHH(code);
 if(!sessionDate){
-document.getElementById('content').innerHTML =
-'<div class="error">Invalid or missing access code.</div>';
-throw new Error('invalid');
+  content.innerHTML='<div class="error">Invalid or missing access code.</div>';
+  throw new Error('invalid');
 }
-
-const expiryDate = new Date(sessionDate);
+const expiryDate=new Date(sessionDate);
 expiryDate.setMonth(expiryDate.getMonth()+1);
-
-if(Date.now() > expiryDate.getTime()){
-document.getElementById('content').innerHTML =
-'<div class="error">This menu is no longer available.</div>';
-throw new Error('expired');
+if(Date.now()>expiryDate.getTime()){
+  content.innerHTML='<div class="error">This menu is no longer available.</div>';
+  throw new Error('expired');
 }
 
-document.getElementById('content').innerHTML = `
-<div class="hero">
-<h1>🧀🍷 Cheese & Wine Tasting</h1>
+content.innerHTML=`
+<section class="hero">
+  <span class="badge">Foodie Experiences Paris</span>
+  <h1>🧀 The Cheese & Wine Menu 🍷</h1>
+  <p>A flavorful journey through French terroirs — one bite at a time!</p>
+</section>
 
-<p>
-Thank you for joining our French cheese and wine experience in Paris.
-</p>
+<h2>Cheeses We Tasted</h2>
+<div class="card">
+  <div class="item">🐐 <strong>Fresh Goat Cheese – 1 Day Old</strong><br>Bright, tangy, and delightfully creamy.</div>
+  <div class="item">🐐 <strong>Saint-Maure de Touraine – 12 Days</strong><br>The classic goat cheese log, smooth and slightly nutty.</div>
+  <div class="item">🐄 <strong>Comté – 18 Months</strong><br>Aged to perfection – deep, nutty, and complex.</div>
+  <div class="item">🐄 <strong>Morbier – 45 Days</strong><br>Mild and creamy with its signature ash line – beautiful and balanced.</div>
+  <div class="item">🐄 <strong>Camembert de Normandie – 29 Days</strong><br>Lusciously soft with earthy aromas – a French icon.</div>
+  <div class="item">🐑 <strong>Roquefort – 45 Days</strong><br>Blue cheese royalty – sharp, salty, and unforgettable.</div>
 </div>
 
-<div class="section">
-<h2>🧀 French cheeses</h2>
+<div class="photoSlot">Image placeholder — cheese board photo later</div>
 
-<p>
-A curated selection of French cheeses from different regions,
-milk types and affinages.
-</p>
+<h2>🍷 Wines We Loved Together</h2>
+<div class="card">
+  <div class="item">🥂 <strong>White Muscadet sur lie from Sèvre-et-Maine</strong><br>Petit Melon grape. Crisp, fresh, and made for cheeses and seafood.</div>
+  <div class="item">🍷 <strong>Red Côtes du Rhône</strong><br>Grenache & Syrah. Smooth and round with a generous fruity character.</div>
+  <div class="item">🍷 <strong>Red Bordeaux – Côtes de Blaye</strong><br>Cabernet Sauvignon & Merlot. Elegant, bold, and ready for a serious cheese moment.</div>
 </div>
 
-<div class="section">
-<h2>🍷 Wine pairings</h2>
-
-<p>
-Carefully selected wines designed to explore harmony,
-contrast and terroir.
-</p>
+<h2>🧂 The Little Extras</h2>
+<div class="card">
+  Normandy Isigny farm butter 🧈<br>
+  Extra virgin olive oil from Provence 🌿<br>
+  Wild blackberry marmalade 🍇<br>
+  White grapes, walnuts, sea salt crystals, cracked black pepper ✨
 </div>
 
-<div class="section">
-<h2>🥖 French gastronomy</h2>
-
-<p>
-A journey through French culture, regional traditions,
-wine history and the French art of the table.
-</p>
-</div>
-
-<div class="section">
-<h2>💕 Thank you</h2>
-
-<p>
-We hope to see you again in Paris.
-</p>
-
-<p>
-👨‍🍳 Chef Alex
-</p>
+<div class="footer">
+  <p>It was truly a pleasure meeting you 💕</p>
+  <p>We can create unforgettable experiences for:<br>
+  🎂 Birthday parties | 🍸 Cocktail kick-offs | 💼 Team buildings | 💕 Romantic meals</p>
+  <p>We’d love to hear what you thought of the experience in your review. Feel free to write it in your native language 🥳</p>
+  <p><strong>Let’s stay connected!</strong><br>
+  👨‍🍳 Chef Alex<br>
+  🌐 www.foodie-experiences.com<br>
+  📱 WhatsApp: +33 (0)6 63 30 62 14<br>
+  📸 YouTube and Instagram @ChefAlexParis</p>
 </div>
 `;
 </script>
-
 </body>
 </html>
