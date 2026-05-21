@@ -71,17 +71,108 @@ h1{
   color:#666;
 }
 .grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-  gap:14px;
   margin-top:24px;
 }
-.grid img{
-  width:100%;
-  border-radius:20px;
+
+.albumPreview{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:190px 190px;
+  gap:6px;
+  border-radius:22px;
+  overflow:hidden;
   border:1px solid var(--border);
   background:#fff;
   box-shadow:0 10px 24px rgba(0,0,0,.05);
+  cursor:pointer;
+}
+
+.albumCell{
+  position:relative;
+  overflow:hidden;
+  background:#f3eee8;
+}
+
+.albumCell img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.albumMore{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.48);
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:42px;
+  font-family:system-ui,sans-serif;
+  font-weight:700;
+}
+
+.galleryOverlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.86);
+  z-index:9999;
+  display:none;
+  overflow:auto;
+  padding:20px;
+}
+
+.galleryInner{
+  max-width:1100px;
+  margin:0 auto;
+}
+
+.galleryTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  color:white;
+  font-family:system-ui,sans-serif;
+  margin-bottom:16px;
+}
+
+.closeGallery{
+  background:white;
+  color:#111;
+  border:0;
+  border-radius:999px;
+  padding:10px 14px;
+  cursor:pointer;
+  font-weight:700;
+}
+
+.fullGallery{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:14px;
+}
+
+.fullGallery img{
+  width:100%;
+  border-radius:18px;
+  background:white;
+}
+
+.menuIntro{
+  margin-top:30px;
+  margin-bottom:12px;
+  text-align:center;
+  color:var(--green);
+  font-size:20px;
+  font-weight:700;
+  font-family:Georgia,"Times New Roman",serif;
+}
+
+@media(max-width:640px){
+  .albumPreview{
+    grid-template-rows:150px 150px;
+  }
 }
 .notice{
   background:#fff;
@@ -149,7 +240,18 @@ h1{
 
   <div class="status" id="status">Loading photos…</div>
   <div class="grid" id="grid"></div>
-
+  <div class="galleryOverlay" id="galleryOverlay">
+  <div class="galleryInner">
+    <div class="galleryTop">
+      <div>Your photos</div>
+      <button class="closeGallery" id="closeGallery">Close</button>
+    </div>
+    <div class="fullGallery" id="fullGallery"></div>
+  </div>
+  </div>
+  <div class="menuIntro">
+  Did you want to see more about your experience?
+  </div>
   <div class="menuLinks" id="menuLinks">
     <a id="btn7course" class="primaryBtn" href="#">🧀🍷 View the Cheese & Wine Menu</a>
     <a id="btnCheese" class="secondaryBtn" href="#">🍽️ View the 7-Course French Tasting Menu</a>
@@ -246,16 +348,71 @@ setInterval(tick,30000);
     }
 
     statusEl.textContent = '';
-    for(const url of data.urls){
-      const img=document.createElement('img');
-      img.src=url;
-      img.loading='lazy';
-      gridEl.appendChild(img);
-    }
+    const urls = data.urls;
+
+// Build WhatsApp-style preview with max 4 visible cells
+const album = document.createElement('div');
+album.className = 'albumPreview';
+
+const previewUrls = urls.slice(0, 4);
+
+previewUrls.forEach((url, index) => {
+  const cell = document.createElement('div');
+  cell.className = 'albumCell';
+
+  const img = document.createElement('img');
+  img.src = url;
+  img.loading = index === 0 ? 'eager' : 'lazy';
+  img.alt = 'Foodie Experiences photo';
+
+  cell.appendChild(img);
+
+  if (index === 3 && urls.length > 4) {
+    const more = document.createElement('div');
+    more.className = 'albumMore';
+    more.textContent = `+${urls.length - 4}`;
+    cell.appendChild(more);
+  }
+
+  album.appendChild(cell);
+});
+
+gridEl.appendChild(album);
+
+// Open full gallery only when clicking the album
+album.addEventListener('click', () => {
+  const overlay = document.getElementById('galleryOverlay');
+  const fullGallery = document.getElementById('fullGallery');
+
+  if (!fullGallery.dataset.loaded) {
+    fullGallery.innerHTML = '';
+
+    urls.forEach(url => {
+      const img = document.createElement('img');
+      img.src = url;
+      img.loading = 'lazy';
+      img.alt = 'Foodie Experiences photo';
+      fullGallery.appendChild(img);
+    });
+
+    fullGallery.dataset.loaded = 'true';
+  }
+
+  overlay.style.display = 'block';
+});
   }catch(e){
     statusEl.innerHTML = '<div class="notice error">Temporary issue loading photos. Please refresh in a minute.</div>';
   }
 })();
+  document.getElementById('closeGallery').addEventListener('click', () => {
+  document.getElementById('galleryOverlay').style.display = 'none';
+});
+
+document.getElementById('galleryOverlay').addEventListener('click', (e) => {
+  if (e.target.id === 'galleryOverlay') {
+    e.currentTarget.style.display = 'none';
+  }
+});
 </script>
 </body>
 </html>
