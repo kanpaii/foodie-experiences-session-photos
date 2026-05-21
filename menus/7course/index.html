@@ -75,7 +75,7 @@ const params = new URLSearchParams(location.search);
 const code = (params.get('code') || '').trim();
 
 function parseYYMMDDHH(s){
-  if(!/^\\d{8}$/.test(s)) return null;
+  if(!/^\d{8}$/.test(s)) return null;
 
   const yy = Number(s.slice(0,2));
   const mm = Number(s.slice(2,4));
