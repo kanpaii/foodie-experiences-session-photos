@@ -19,6 +19,14 @@ h2{color:var(--coral);margin-top:34px}
 .photoSlot{margin-top:14px;border:2px dashed #eadfd4;border-radius:18px;padding:26px;text-align:center;color:#999;font-family:system-ui,sans-serif}
 .footer{margin-top:30px;background:var(--green);color:white;border-radius:24px;padding:24px}
 .error{background:#fff4f4;border:1px solid #ffd0d0;padding:14px;border-radius:12px}
+.menuImg{
+  width:100%;
+  max-height:420px;
+  object-fit:cover;
+  border-radius:20px;
+  margin:18px 0;
+  border:1px solid #eadfd4;
+}
 </style>
 </head>
 <body>
@@ -52,8 +60,10 @@ content.innerHTML=`
   <h1>🧀 The Cheese & Wine Menu 🍷</h1>
   <p>A flavorful journey through French terroirs — one bite at a time!</p>
 </section>
+<img class="menuImg" src="/assets/menus/fromages.jpg" alt="French cheese selection">
 
 <h2>Cheeses We Tasted</h2>
+<img class="menuImg" src="/assets/menus/a4.jpg" alt="Cheese tasting board">
 <div class="card">
   <div class="item">🐐 <strong>Fresh Goat Cheese – 1 Day Old</strong><br>Bright, tangy, and delightfully creamy.</div>
   <div class="item">🐐 <strong>Saint-Maure de Touraine – 12 Days</strong><br>The classic goat cheese log, smooth and slightly nutty.</div>
@@ -63,9 +73,8 @@ content.innerHTML=`
   <div class="item">🐑 <strong>Roquefort – 45 Days</strong><br>Blue cheese royalty – sharp, salty, and unforgettable.</div>
 </div>
 
-<div class="photoSlot">Image placeholder — cheese board photo later</div>
-
 <h2>🍷 Wines We Loved Together</h2>
+<img class="menuImg" src="/assets/menus/table-et-verres.jpg" alt="Wine tasting table">
 <div class="card">
   <div class="item">🥂 <strong>White Muscadet sur lie from Sèvre-et-Maine</strong><br>Petit Melon grape. Crisp, fresh, and made for cheeses and seafood.</div>
   <div class="item">🍷 <strong>Red Côtes du Rhône</strong><br>Grenache & Syrah. Smooth and round with a generous fruity character.</div>
