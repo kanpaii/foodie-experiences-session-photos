@@ -217,6 +217,46 @@ h1{
   font-size:14px;
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
 }
+  .photoOverlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.92);
+  z-index:10000;
+  display:none;
+  padding:18px;
+}
+
+.photoTop{
+  position:sticky;
+  top:0;
+  z-index:10001;
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.downloadBtn{
+  background:var(--coral);
+  color:#fff;
+  border:0;
+  border-radius:999px;
+  padding:10px 14px;
+  cursor:pointer;
+  font-weight:700;
+  text-decoration:none;
+  font-family:system-ui,sans-serif;
+}
+
+#fullPhoto{
+  display:block;
+  max-width:100%;
+  max-height:calc(100vh - 90px);
+  margin:0 auto;
+  object-fit:contain;
+  border-radius:18px;
+  background:white;
+}
 </style>
 </head>
 
@@ -240,15 +280,16 @@ h1{
 
   <div class="status" id="status">Loading photos…</div>
   <div class="grid" id="grid"></div>
-  <div class="galleryOverlay" id="galleryOverlay">
-  <div class="galleryInner">
-    <div class="galleryTop">
-      <div>Your photos</div>
-      <button class="closeGallery" id="closeGallery">Close</button>
-    </div>
-    <div class="fullGallery" id="fullGallery"></div>
+<div class="photoOverlay" id="photoOverlay">
+  <div class="photoTop">
+    <button class="closeGallery" id="closePhoto">Close</button>
+    <a class="downloadBtn" id="downloadPhoto" href="#" download target="_blank">
+      Download full quality
+    </a>
   </div>
-  </div>
+
+  <img id="fullPhoto" alt="Full size Foodie Experiences photo">
+</div>
   <div class="menuIntro">
   Did you want to see more about your experience?
   </div>
@@ -387,13 +428,19 @@ album.addEventListener('click', () => {
   if (!fullGallery.dataset.loaded) {
     fullGallery.innerHTML = '';
 
-    urls.forEach(url => {
-      const img = document.createElement('img');
-      img.src = url;
-      img.loading = 'lazy';
-      img.alt = 'Foodie Experiences photo';
-      fullGallery.appendChild(img);
-    });
+    urls.forEach((url, i) => {
+  const img = document.createElement('img');
+  img.src = url;
+  img.loading = 'lazy';
+  img.alt = 'Foodie Experiences photo';
+  img.style.cursor = 'zoom-in';
+
+  img.addEventListener('click', () => {
+    openPhoto(url, i);
+  });
+
+  fullGallery.appendChild(img);
+});
 
     fullGallery.dataset.loaded = 'true';
   }
@@ -411,6 +458,28 @@ album.addEventListener('click', () => {
 document.getElementById('galleryOverlay').addEventListener('click', (e) => {
   if (e.target.id === 'galleryOverlay') {
     e.currentTarget.style.display = 'none';
+  }
+});
+  function openPhoto(url, index){
+  const overlay = document.getElementById('photoOverlay');
+  const fullPhoto = document.getElementById('fullPhoto');
+  const download = document.getElementById('downloadPhoto');
+
+  fullPhoto.src = url;
+  download.href = url;
+  download.setAttribute('download', `foodie-experiences-photo-${index + 1}.jpg`);
+
+  overlay.style.display = 'block';
+}
+  document.getElementById('closePhoto').addEventListener('click', () => {
+  document.getElementById('photoOverlay').style.display = 'none';
+  document.getElementById('fullPhoto').src = '';
+});
+
+document.getElementById('photoOverlay').addEventListener('click', (e) => {
+  if (e.target.id === 'photoOverlay') {
+    document.getElementById('photoOverlay').style.display = 'none';
+    document.getElementById('fullPhoto').src = '';
   }
 });
 </script>
