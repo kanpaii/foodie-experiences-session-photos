@@ -1,5 +1,16 @@
 {
-  "routes": [
-    { "src": "/sessions/(.*)", "dest": "/sessions/index.html" }
+  "rewrites": [
+    {
+      "source": "/sessions/:code",
+      "destination": "/sessions/index.html"
+    },
+    {
+      "source": "/menus/7course",
+      "destination": "/menus/7course/index.html"
+    },
+    {
+      "source": "/menus/cheesewine",
+      "destination": "/menus/cheesewine/index.html"
+    }
   ]
 }
