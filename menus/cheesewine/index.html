@@ -1,1 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 
+<title>Cheese & Wine Tasting</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+max-width:900px;
+margin:40px auto;
+padding:0 16px;
+line-height:1.5;
+}
+
+.hero{
+margin-bottom:28px;
+}
+
+.section{
+margin-top:24px;
+padding-top:20px;
+border-top:1px solid #eee;
+}
+
+.error{
+background:#fff4f4;
+border:1px solid #ffd0d0;
+padding:14px;
+border-radius:12px;
+}
+</style>
+</head>
+<body>
+
+<div id="content"></div>
+
+<script>
+const params = new URLSearchParams(location.search);
+const code = (params.get('code') || '').trim();
+
+function parseYYMMDDHH(s){
+if(!/^\\d{8}$/.test(s)) return null;
+
+const yy = Number(s.slice(0,2));
+const mm = Number(s.slice(2,4));
+const dd = Number(s.slice(4,6));
+const hh = Number(s.slice(6,8));
+
+return new Date(2000+yy, mm-1, dd, hh, 0, 0);
+}
+
+const sessionDate = parseYYMMDDHH(code);
+
+if(!sessionDate){
+document.getElementById('content').innerHTML =
+'<div class="error">Invalid or missing access code.</div>';
+throw new Error('invalid');
+}
+
+const expiryDate = new Date(sessionDate);
+expiryDate.setMonth(expiryDate.getMonth()+1);
+
+if(Date.now() > expiryDate.getTime()){
+document.getElementById('content').innerHTML =
+'<div class="error">This menu is no longer available.</div>';
+throw new Error('expired');
+}
+
+document.getElementById('content').innerHTML = `
+<div class="hero">
+<h1>🧀🍷 Cheese & Wine Tasting</h1>
+
+<p>
+Thank you for joining our French cheese and wine experience in Paris.
+</p>
+</div>
+
+<div class="section">
+<h2>🧀 French cheeses</h2>
+
+<p>
+A curated selection of French cheeses from different regions,
+milk types and affinages.
+</p>
+</div>
+
+<div class="section">
+<h2>🍷 Wine pairings</h2>
+
+<p>
+Carefully selected wines designed to explore harmony,
+contrast and terroir.
+</p>
+</div>
+
+<div class="section">
+<h2>🥖 French gastronomy</h2>
+
+<p>
+A journey through French culture, regional traditions,
+wine history and the French art of the table.
+</p>
+</div>
+
+<div class="section">
+<h2>💕 Thank you</h2>
+
+<p>
+We hope to see you again in Paris.
+</p>
+
+<p>
+👨‍🍳 Chef Alex
+</p>
+</div>
+`;
+</script>
+
+</body>
+</html>
