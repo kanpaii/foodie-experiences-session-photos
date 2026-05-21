@@ -87,7 +87,8 @@
     const code = (location.pathname.split('/')[2] || '').trim();
     const statusEl = document.getElementById('status');
     const gridEl = document.getElementById('grid');
-
+    const btn7course = document.getElementById('btn7course');
+    const btnCheese = document.getElementById('btnCheese');
     const metaWrap = document.getElementById('metaWrap');
     const codeTxt = document.getElementById('codeTxt');
     const sessionTxt = document.getElementById('sessionTxt');
@@ -123,7 +124,10 @@
       statusEl.innerHTML = '<div class="error">Invalid code. Please use the 8-digit code provided by your host (YYMMDDHH).</div>';
       throw new Error('Invalid code');
     }
-
+    
+    btn7course.href = `/menus/7course?code=${encodeURIComponent(code)}`;
+    btnCheese.href = `/menus/cheesewine?code=${encodeURIComponent(code)}`;
+    
     // Expiration: +1 calendar month from the session date/time
     const expiryDate = new Date(sessionDate);
     expiryDate.setMonth(expiryDate.getMonth() + 1);
