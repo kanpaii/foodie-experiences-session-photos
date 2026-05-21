@@ -1,186 +1,262 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Session Photos</title>
-  <style>
-    *{box-sizing:border-box}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:1040px;margin:40px auto;padding:0 16px}
-    .muted{color:#666}
-    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:stretch}
-    .panel{border:1px solid #e6e6e6;border-radius:14px;padding:12px 14px;flex:1;min-width:240px}
-    .k{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.06em}
-    .v{font-size:15px;margin-top:4px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:18px}
-    img{width:100%;border-radius:14px;border:1px solid #eee}
-    .error{background:#fff4f4;border:1px solid #ffd0d0;padding:12px;border-radius:12px;margin-top:16px}
-    .ok{background:#f3fff3;border:1px solid #c9f1c9;padding:12px;border-radius:12px;margin-top:16px}
-  </style>
-</head>
-<body>
-  <h1>📸 Your Session Photos</h1>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Your Foodie Experiences Photos</title>
 
-  <div class="top" id="metaWrap" style="display:none;margin-top:12px;">
-    <div class="panel">
-      <div class="k">Photo code</div>
-      <div class="v" id="codeTxt">—</div>
+<style>
+*{box-sizing:border-box}
+:root{
+  --coral:#f26f5e;
+  --green:#0b6b57;
+  --cream:#fff8f1;
+  --ink:#1d1d1d;
+  --soft:#fff;
+  --border:#eadfd4;
+}
+body{
+  margin:0;
+  font-family:Georgia,"Times New Roman",serif;
+  background:var(--cream);
+  color:var(--ink);
+  line-height:1.55;
+}
+main{
+  max-width:1100px;
+  margin:0 auto;
+  padding:34px 18px;
+}
+.hero{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:26px;
+  padding:28px;
+  box-shadow:0 12px 30px rgba(0,0,0,.04);
+}
+.badge{
+  display:inline-block;
+  background:var(--green);
+  color:white;
+  border-radius:999px;
+  padding:7px 14px;
+  font-family:system-ui,sans-serif;
+  font-size:13px;
+}
+h1{
+  color:var(--green);
+  font-size:38px;
+  margin:18px 0 8px;
+  line-height:1.15;
+}
+.subtitle{
+  color:#555;
+  font-size:17px;
+  margin:0;
+}
+.meta{
+  margin-top:16px;
+  color:#6d625c;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  font-size:13px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.dot{color:var(--coral)}
+.status{
+  margin-top:18px;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  color:#666;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:14px;
+  margin-top:24px;
+}
+.grid img{
+  width:100%;
+  border-radius:20px;
+  border:1px solid var(--border);
+  background:#fff;
+  box-shadow:0 10px 24px rgba(0,0,0,.05);
+}
+.notice{
+  background:#fff;
+  border:1px solid var(--border);
+  padding:14px 16px;
+  border-radius:16px;
+  margin-top:16px;
+}
+.error{
+  background:#fff4f4;
+  border:1px solid #ffd0d0;
+  color:#8d1f1f;
+}
+.menuLinks{
+  margin-top:32px;
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.menuLinks a{
+  display:inline-block;
+  padding:14px 18px;
+  border-radius:16px;
+  text-decoration:none;
+  font-weight:700;
+  flex:1;
+  min-width:250px;
+  text-align:center;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+}
+.primaryBtn{
+  background:var(--green);
+  color:#fff;
+}
+.secondaryBtn{
+  background:#fff;
+  color:var(--green);
+  border:1px solid var(--border);
+}
+.footerNote{
+  margin-top:26px;
+  color:#6d625c;
+  font-size:14px;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+}
+</style>
+</head>
+
+<body>
+<main>
+  <section class="hero">
+    <span class="badge">Foodie Experiences Paris</span>
+    <h1>📸 Your Photos</h1>
+    <p class="subtitle">
+      Here are a few memories from our delicious time together.
+    </p>
+
+    <div class="meta" id="metaLine" style="display:none;">
+      <span id="sessionTxt"></span>
+      <span class="dot">•</span>
+      <span id="expiryTxt"></span>
+      <span class="dot">•</span>
+      <span id="countdownTxt"></span>
     </div>
-    <div class="panel">
-      <div class="k">Session time (Paris)</div>
-      <div class="v" id="sessionTxt">—</div>
-    </div>
-    <div class="panel">
-      <div class="k">Available until (Paris)</div>
-      <div class="v" id="expiryTxt">—</div>
-    </div>
-    <div class="panel">
-      <div class="k">Time left</div>
-      <div class="v" id="countdownTxt">—</div>
-    </div>
+  </section>
+
+  <div class="status" id="status">Loading photos…</div>
+  <div class="grid" id="grid"></div>
+
+  <div class="menuLinks" id="menuLinks">
+    <a id="btn7course" class="primaryBtn" href="#">🍽️ View the 7-Course French Tasting Menu</a>
+    <a id="btnCheese" class="secondaryBtn" href="#">🧀🍷 View the Cheese & Wine Menu</a>
   </div>
 
-  <div class="muted" id="status" style="margin-top:12px;">Loading…</div>
-  <div class="grid" id="grid"></div>
-  <div id="menuLinks" style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap;">
-  <a
-    id="btn7course"
-    href="#"
-    style="
-      display:inline-block;
-      padding:14px 18px;
-      border-radius:14px;
-      background:#111;
-      color:#fff;
-      text-decoration:none;
-      font-weight:600;
-      flex:1;
-      min-width:240px;
-      text-align:center;
-    "
-  >
-    🍽️ View the 7-Course French Tasting Menu
-  </a>
+  <div class="footerNote">
+    Photos are available for one month after your experience.
+  </div>
+</main>
 
-  <a
-    id="btnCheese"
-    href="#"
-    style="
-      display:inline-block;
-      padding:14px 18px;
-      border-radius:14px;
-      background:#fff;
-      color:#111;
-      border:1px solid #ddd;
-      text-decoration:none;
-      font-weight:600;
-      flex:1;
-      min-width:240px;
-      text-align:center;
-    "
-  >
-    🧀🍷 View the Cheese & Wine Menu
-  </a>
-</div>
+<script>
+const code = (location.pathname.split('/')[2] || '').trim();
 
-  <script>
-    const code = (location.pathname.split('/')[2] || '').trim();
-    const statusEl = document.getElementById('status');
-    const gridEl = document.getElementById('grid');
-    const btn7course = document.getElementById('btn7course');
-    const btnCheese = document.getElementById('btnCheese');
-    const metaWrap = document.getElementById('metaWrap');
-    const codeTxt = document.getElementById('codeTxt');
-    const sessionTxt = document.getElementById('sessionTxt');
-    const expiryTxt = document.getElementById('expiryTxt');
-    const countdownTxt = document.getElementById('countdownTxt');
+const statusEl = document.getElementById('status');
+const gridEl = document.getElementById('grid');
+const metaLine = document.getElementById('metaLine');
+const sessionTxt = document.getElementById('sessionTxt');
+const expiryTxt = document.getElementById('expiryTxt');
+const countdownTxt = document.getElementById('countdownTxt');
 
-    function fmtParis(d){
-      return d.toLocaleString('en-GB', {
-        timeZone: 'Europe/Paris',
-        year: 'numeric',
-        month: 'short',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+const btn7course = document.getElementById('btn7course');
+const btnCheese = document.getElementById('btnCheese');
+
+function fmtParis(d){
+  return d.toLocaleString('en-GB', {
+    timeZone:'Europe/Paris',
+    year:'numeric',
+    month:'short',
+    day:'2-digit',
+    hour:'2-digit',
+    minute:'2-digit'
+  });
+}
+
+function parseYYMMDDHH(s){
+  if(!/^\d{8}$/.test(s)) return null;
+  const yy=Number(s.slice(0,2));
+  const mm=Number(s.slice(2,4));
+  const dd=Number(s.slice(4,6));
+  const hh=Number(s.slice(6,8));
+  if(mm<1||mm>12||dd<1||dd>31||hh<0||hh>23) return null;
+  const dt=new Date(2000+yy,mm-1,dd,hh,0,0);
+  return Number.isNaN(dt.getTime()) ? null : dt;
+}
+
+const sessionDate = parseYYMMDDHH(code);
+
+if(!sessionDate){
+  statusEl.innerHTML = '<div class="notice error">Invalid code. Please use the 8-digit code provided by your host.</div>';
+  throw new Error('Invalid code');
+}
+
+const expiryDate = new Date(sessionDate);
+expiryDate.setMonth(expiryDate.getMonth()+1);
+
+metaLine.style.display = '';
+sessionTxt.textContent = `Session: ${fmtParis(sessionDate)}`;
+expiryTxt.textContent = `Available until: ${fmtParis(expiryDate)}`;
+
+btn7course.href = `/menus/7course?code=${encodeURIComponent(code)}`;
+btnCheese.href = `/menus/cheesewine?code=${encodeURIComponent(code)}`;
+
+function tick(){
+  const ms = expiryDate.getTime() - Date.now();
+  if(ms <= 0){
+    countdownTxt.textContent = 'Expired';
+    statusEl.innerHTML = `<div class="notice error">This gallery expired on ${fmtParis(expiryDate)}.</div>`;
+    return false;
+  }
+  const totalMin = Math.floor(ms/60000);
+  const days = Math.floor(totalMin/(60*24));
+  const hours = Math.floor((totalMin%(60*24))/60);
+  countdownTxt.textContent = `${days} days ${hours} hours left`;
+  return true;
+}
+
+if(!tick()) throw new Error('Expired');
+setInterval(tick,30000);
+
+(async()=>{
+  try{
+    statusEl.textContent = "Loading photos…";
+    const r = await fetch(`/api/list?code=${encodeURIComponent(code)}`);
+    const data = await r.json();
+
+    if(!r.ok){
+      statusEl.innerHTML = '<div class="notice error">Temporary issue loading photos. Please refresh in a minute.</div>';
+      return;
     }
 
-    function parseYYMMDDHH(s){
-      if (!/^\d{8}$/.test(s)) return null;
-      const yy = Number(s.slice(0,2));
-      const mm = Number(s.slice(2,4));
-      const dd = Number(s.slice(4,6));
-      const hh = Number(s.slice(6,8));
-      if (mm < 1 || mm > 12 || dd < 1 || dd > 31 || hh < 0 || hh > 23) return null;
-      const year = 2000 + yy;
-      const dt = new Date(year, mm-1, dd, hh, 0, 0);
-      return Number.isNaN(dt.getTime()) ? null : dt;
+    if(!data.urls || data.urls.length===0){
+      statusEl.innerHTML = '<div class="notice">No photos yet. Please check back soon.</div>';
+      return;
     }
 
-    const sessionDate = parseYYMMDDHH(code);
-
-    if (!sessionDate) {
-      statusEl.innerHTML = '<div class="error">Invalid code. Please use the 8-digit code provided by your host (YYMMDDHH).</div>';
-      throw new Error('Invalid code');
+    statusEl.textContent = '';
+    for(const url of data.urls){
+      const img=document.createElement('img');
+      img.src=url;
+      img.loading='lazy';
+      gridEl.appendChild(img);
     }
-    
-    btn7course.href = `/menus/7course?code=${encodeURIComponent(code)}`;
-    btnCheese.href = `/menus/cheesewine?code=${encodeURIComponent(code)}`;
-    
-    // Expiration: +1 calendar month from the session date/time
-    const expiryDate = new Date(sessionDate);
-    expiryDate.setMonth(expiryDate.getMonth() + 1);
-
-    metaWrap.style.display = '';
-    codeTxt.textContent = code;
-    sessionTxt.textContent = fmtParis(sessionDate);
-    expiryTxt.textContent = fmtParis(expiryDate);
-
-    function tick(){
-      const ms = expiryDate.getTime() - Date.now();
-      if (ms <= 0) {
-        countdownTxt.textContent = 'Expired';
-        statusEl.innerHTML = `<div class="error">This gallery expired on ${fmtParis(expiryDate)}.</div>`;
-        return false;
-      }
-      const totalMin = Math.floor(ms / 60000);
-      const days = Math.floor(totalMin / (60*24));
-      const hours = Math.floor((totalMin % (60*24)) / 60);
-      const mins = totalMin % 60;
-      countdownTxt.textContent = `${days}d ${hours}h ${mins}m`;
-      return true;
-    }
-
-    if (!tick()) {
-      throw new Error('Expired');
-    }
-    setInterval(tick, 30000);
-
-    (async () => {
-      try {
-        statusEl.textContent = "Loading photos… (first load can take a few seconds)";
-        const r = await fetch(`/api/list?code=${encodeURIComponent(code)}`);
-        const data = await r.json();
-        if (!r.ok) {
-          statusEl.innerHTML = `<div class="error">Temporary issue loading photos. Please refresh in a minute.</div>`;
-          return;
-        }
-        if (!data.urls || data.urls.length === 0) {
-          statusEl.innerHTML = `<div class="ok">No photos yet. Please check back soon.</div>`;
-          return;
-        }
-        statusEl.textContent = `Found ${data.urls.length} photo(s).`;
-        for (const url of data.urls) {
-          const img = document.createElement('img');
-          img.src = url;
-          img.loading = "lazy";
-          gridEl.appendChild(img);
-        }
-      } catch (e) {
-        statusEl.innerHTML = `<div class="error">Temporary issue loading photos. Please refresh in a minute.</div>`;
-      }
-    })();
-  </script>
+  }catch(e){
+    statusEl.innerHTML = '<div class="notice error">Temporary issue loading photos. Please refresh in a minute.</div>';
+  }
+})();
+</script>
 </body>
 </html>
