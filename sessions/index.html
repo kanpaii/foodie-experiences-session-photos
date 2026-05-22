@@ -406,39 +406,6 @@ setInterval(tick,30000);
     }
 
     statusEl.textContent = '';
-    const urls = data.urls;
-
-// Build WhatsApp-style preview with max 4 visible cells
-const album = document.createElement('div');
-album.className = 'albumPreview';
-
-const previewUrls = urls.slice(0, 4);
-
-previewUrls.forEach((url, index) => {
-  const cell = document.createElement('div');
-  cell.className = 'albumCell';
-
-  const img = document.createElement('img');
-  img.src = url;
-  img.loading = index === 0 ? 'eager' : 'lazy';
-  img.alt = 'Foodie Experiences photo';
-
-  cell.appendChild(img);
-
-  if (index === 3 && urls.length > 4) {
-    const more = document.createElement('div');
-    more.className = 'albumMore';
-    more.textContent = `+${urls.length - 4}`;
-    cell.appendChild(more);
-  }
-
-  album.appendChild(cell);
-});
-
-gridEl.appendChild(album);
-
-// Open full gallery only when clicking the album
-statusEl.textContent = '';
 
 const urls = data.urls;
 
@@ -449,6 +416,7 @@ album.className = 'albumPreview';
 const previewUrls = urls.slice(0,4);
 
 previewUrls.forEach((url,index)=>{
+
   const cell = document.createElement('div');
   cell.className = 'albumCell';
 
@@ -459,9 +427,11 @@ previewUrls.forEach((url,index)=>{
   cell.appendChild(img);
 
   if(index===3 && urls.length>4){
+
     const more = document.createElement('div');
     more.className = 'albumMore';
     more.textContent = `+${urls.length-4}`;
+
     cell.appendChild(more);
   }
 
@@ -471,7 +441,7 @@ previewUrls.forEach((url,index)=>{
 gridEl.appendChild(album);
 
 // ===== Open gallery =====
-album.addEventListener('click', ()=>{
+album.addEventListener('click',()=>{
 
   const overlay = document.getElementById('galleryOverlay');
   const fullGallery = document.getElementById('fullGallery');
@@ -487,7 +457,9 @@ album.addEventListener('click', ()=>{
       img.style.cursor = 'zoom-in';
 
       img.addEventListener('click',(e)=>{
+
         e.stopPropagation();
+
         openPhoto(url,i);
       });
 
@@ -507,7 +479,7 @@ album.addEventListener('click', ()=>{
   console.error(e);
 
   statusEl.innerHTML =
-    '<div class="notice error">Temporary issue loading photos. Please refresh in a minute.</div>';
+  '<div class="notice error">Temporary issue loading photos. Please refresh in a minute.</div>';
 }
 })();
 
@@ -577,64 +549,6 @@ document.getElementById('photoOverlay')
 
     document.getElementById('fullPhoto').src='';
   }
-});
-function closeGalleryOverlay(){
-  const ov = document.getElementById('galleryOverlay');
-  if (!ov) return;
-  ov.style.display = 'none';
-  ov.style.pointerEvents = 'none';
-}
-
-function openPhoto(url, index){
-  const overlay = document.getElementById('photoOverlay');
-  const fullPhoto = document.getElementById('fullPhoto');
-  const download = document.getElementById('downloadPhoto');
-
-  if (!overlay || !fullPhoto || !download) return;
-
-  fullPhoto.src = url;
-  download.href = url;
-  download.setAttribute('download', `foodie-experiences-photo-${index + 1}.jpg`);
-
-  overlay.style.display = 'block';
-  overlay.style.pointerEvents = 'auto';
-}
-
-function closePhotoOverlay(){
-  const pov = document.getElementById('photoOverlay');
-  const fullPhoto = document.getElementById('fullPhoto');
-
-  if (!pov) return;
-
-  pov.style.display = 'none';
-  pov.style.pointerEvents = 'none';
-
-  if (fullPhoto) fullPhoto.src = '';
-}
-
-const closeGalleryBtn = document.getElementById('closeGallery');
-if (closeGalleryBtn) {
-  closeGalleryBtn.addEventListener('click', closeGalleryOverlay);
-}
-
-const galleryOverlay = document.getElementById('galleryOverlay');
-if (galleryOverlay) {
-  galleryOverlay.addEventListener('click', (e) => {
-    if (e.target.id === 'galleryOverlay') closeGalleryOverlay();
-  });
-}
-
-const closePhotoBtn = document.getElementById('closePhoto');
-if (closePhotoBtn) {
-  closePhotoBtn.addEventListener('click', closePhotoOverlay);
-}
-
-const photoOverlay = document.getElementById('photoOverlay');
-if (photoOverlay) {
-  photoOverlay.addEventListener('click', (e) => {
-    if (e.target.id === 'photoOverlay') closePhotoOverlay();
-  });
-}
 });
 </script>
 </body>
