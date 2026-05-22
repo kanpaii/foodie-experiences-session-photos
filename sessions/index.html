@@ -442,22 +442,28 @@ album.addEventListener('click', () => {
   const overlay = document.getElementById('galleryOverlay');
   const fullGallery = document.getElementById('fullGallery');
 
+  if (!overlay || !fullGallery) {
+    alert('Gallery HTML missing.');
+    return;
+  }
+
   if (!fullGallery.dataset.loaded) {
     fullGallery.innerHTML = '';
 
     urls.forEach((url, i) => {
-  const img = document.createElement('img');
-  img.src = url;
-  img.loading = 'lazy';
-  img.alt = 'Foodie Experiences photo';
-  img.style.cursor = 'zoom-in';
+      const img = document.createElement('img');
+      img.src = url;
+      img.loading = 'lazy';
+      img.alt = 'Foodie Experiences photo';
+      img.style.cursor = 'zoom-in';
 
-  img.addEventListener('click', () => {
-    openPhoto(url, i);
-  });
+      img.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openPhoto(url, i);
+      });
 
-  fullGallery.appendChild(img);
-});
+      fullGallery.appendChild(img);
+    });
 
     fullGallery.dataset.loaded = 'true';
   }
@@ -465,25 +471,24 @@ album.addEventListener('click', () => {
   overlay.style.display = 'block';
   overlay.style.pointerEvents = 'auto';
 });
-  }catch(e){
+  } catch(e) {
     statusEl.innerHTML = '<div class="notice error">Temporary issue loading photos. Please refresh in a minute.</div>';
   }
 })();
-  document.getElementById('closeGallery').addEventListener('click', () => {
+
+function closeGalleryOverlay(){
   const ov = document.getElementById('galleryOverlay');
+  if (!ov) return;
   ov.style.display = 'none';
   ov.style.pointerEvents = 'none';
-});
+}
 
-document.getElementById('galleryOverlay').addEventListener('click', (e) => {
-  if (e.target.id === 'galleryOverlay') {
-    e.currentTarget.style.display = 'none';
-  }
-});
-  function openPhoto(url, index){
+function openPhoto(url, index){
   const overlay = document.getElementById('photoOverlay');
   const fullPhoto = document.getElementById('fullPhoto');
   const download = document.getElementById('downloadPhoto');
+
+  if (!overlay || !fullPhoto || !download) return;
 
   fullPhoto.src = url;
   download.href = url;
@@ -492,17 +497,42 @@ document.getElementById('galleryOverlay').addEventListener('click', (e) => {
   overlay.style.display = 'block';
   overlay.style.pointerEvents = 'auto';
 }
-  document.getElementById('closePhoto').addEventListener('click', () => {
-  const pov = document.getElementById('photoOverlay');
-  pov.style.display = 'none';
-  pov.style.pointerEvents = 'none';  document.getElementById('fullPhoto').src = '';
-});
 
-document.getElementById('photoOverlay').addEventListener('click', (e) => {
-  if (e.target.id === 'photoOverlay') {
-    document.getElementById('photoOverlay').style.display = 'none';
-    document.getElementById('fullPhoto').src = '';
-  }
+function closePhotoOverlay(){
+  const pov = document.getElementById('photoOverlay');
+  const fullPhoto = document.getElementById('fullPhoto');
+
+  if (!pov) return;
+
+  pov.style.display = 'none';
+  pov.style.pointerEvents = 'none';
+
+  if (fullPhoto) fullPhoto.src = '';
+}
+
+const closeGalleryBtn = document.getElementById('closeGallery');
+if (closeGalleryBtn) {
+  closeGalleryBtn.addEventListener('click', closeGalleryOverlay);
+}
+
+const galleryOverlay = document.getElementById('galleryOverlay');
+if (galleryOverlay) {
+  galleryOverlay.addEventListener('click', (e) => {
+    if (e.target.id === 'galleryOverlay') closeGalleryOverlay();
+  });
+}
+
+const closePhotoBtn = document.getElementById('closePhoto');
+if (closePhotoBtn) {
+  closePhotoBtn.addEventListener('click', closePhotoOverlay);
+}
+
+const photoOverlay = document.getElementById('photoOverlay');
+if (photoOverlay) {
+  photoOverlay.addEventListener('click', (e) => {
+    if (e.target.id === 'photoOverlay') closePhotoOverlay();
+  });
+}
 });
 </script>
 </body>
