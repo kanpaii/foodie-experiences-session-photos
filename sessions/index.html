@@ -438,44 +438,146 @@ previewUrls.forEach((url, index) => {
 gridEl.appendChild(album);
 
 // Open full gallery only when clicking the album
-album.addEventListener('click', () => {
+statusEl.textContent = '';
+
+const urls = data.urls;
+
+// ===== Album preview =====
+const album = document.createElement('div');
+album.className = 'albumPreview';
+
+const previewUrls = urls.slice(0,4);
+
+previewUrls.forEach((url,index)=>{
+  const cell = document.createElement('div');
+  cell.className = 'albumCell';
+
+  const img = document.createElement('img');
+  img.src = url;
+  img.loading = index===0 ? 'eager' : 'lazy';
+
+  cell.appendChild(img);
+
+  if(index===3 && urls.length>4){
+    const more = document.createElement('div');
+    more.className = 'albumMore';
+    more.textContent = `+${urls.length-4}`;
+    cell.appendChild(more);
+  }
+
+  album.appendChild(cell);
+});
+
+gridEl.appendChild(album);
+
+// ===== Open gallery =====
+album.addEventListener('click', ()=>{
+
   const overlay = document.getElementById('galleryOverlay');
   const fullGallery = document.getElementById('fullGallery');
 
-  if (!overlay || !fullGallery) {
-    alert('Gallery HTML missing.');
-    return;
-  }
+  if(!fullGallery.dataset.loaded){
 
-  if (!fullGallery.dataset.loaded) {
-    fullGallery.innerHTML = '';
+    urls.forEach((url,i)=>{
 
-    urls.forEach((url, i) => {
       const img = document.createElement('img');
+
       img.src = url;
       img.loading = 'lazy';
-      img.alt = 'Foodie Experiences photo';
       img.style.cursor = 'zoom-in';
 
-      img.addEventListener('click', (e) => {
+      img.addEventListener('click',(e)=>{
         e.stopPropagation();
-        openPhoto(url, i);
+        openPhoto(url,i);
       });
 
       fullGallery.appendChild(img);
+
     });
 
-    fullGallery.dataset.loaded = 'true';
+    fullGallery.dataset.loaded='true';
   }
 
-  overlay.style.display = 'block';
-  overlay.style.pointerEvents = 'auto';
+  overlay.style.display='block';
+  overlay.style.pointerEvents='auto';
 });
-  } catch(e) {
-    statusEl.innerHTML = '<div class="notice error">Temporary issue loading photos. Please refresh in a minute.</div>';
-  }
+
+}catch(e){
+
+  console.error(e);
+
+  statusEl.innerHTML =
+    '<div class="notice error">Temporary issue loading photos. Please refresh in a minute.</div>';
+}
 })();
 
+// ===== Open full photo =====
+function openPhoto(url,index){
+
+  const overlay=document.getElementById('photoOverlay');
+  const fullPhoto=document.getElementById('fullPhoto');
+  const download=document.getElementById('downloadPhoto');
+
+  fullPhoto.src=url;
+
+  download.href=url;
+
+  download.setAttribute(
+    'download',
+    `foodie-experiences-photo-${index+1}.jpg`
+  );
+
+  overlay.style.display='block';
+  overlay.style.pointerEvents='auto';
+}
+
+// ===== Close gallery =====
+document.getElementById('closeGallery')
+.addEventListener('click',()=>{
+
+  const ov=document.getElementById('galleryOverlay');
+
+  ov.style.display='none';
+  ov.style.pointerEvents='none';
+});
+
+document.getElementById('galleryOverlay')
+.addEventListener('click',(e)=>{
+
+  if(e.target.id==='galleryOverlay'){
+
+    const ov=document.getElementById('galleryOverlay');
+
+    ov.style.display='none';
+    ov.style.pointerEvents='none';
+  }
+});
+
+// ===== Close full photo =====
+document.getElementById('closePhoto')
+.addEventListener('click',()=>{
+
+  const pov=document.getElementById('photoOverlay');
+
+  pov.style.display='none';
+  pov.style.pointerEvents='none';
+
+  document.getElementById('fullPhoto').src='';
+});
+
+document.getElementById('photoOverlay')
+.addEventListener('click',(e)=>{
+
+  if(e.target.id==='photoOverlay'){
+
+    const pov=document.getElementById('photoOverlay');
+
+    pov.style.display='none';
+    pov.style.pointerEvents='none';
+
+    document.getElementById('fullPhoto').src='';
+  }
+});
 function closeGalleryOverlay(){
   const ov = document.getElementById('galleryOverlay');
   if (!ov) return;
